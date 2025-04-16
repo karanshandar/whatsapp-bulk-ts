@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Bulk Messenger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <i class="fab fa-whatsapp"></i>
+        <h1>WhatsApp Bulk Messenger</h1>
+      </div>
+      <div class="connection-status" id="connection-status">
+        <span class="status-indicator disconnected"></span>
+        <span class="status-text">Disconnected</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Sidebar -->
+      <aside class="app-sidebar">
+        <nav class="nav-menu">
+          <ul>
+            <li class="active" data-tab="connection">
+              <a href="#connection"><i class="fas fa-link"></i> Connection</a>
+            </li>
+            <li data-tab="excel-upload">
+              <a href="#excel-upload"><i class="fas fa-file-excel"></i> Excel Upload</a>
+            </li>
+            <li data-tab="messaging">
+              <a href="#messaging"><i class="fas fa-paper-plane"></i> Send Messages</a>
+            </li>
+            <li data-tab="stats">
+              <a href="#stats"><i class="fas fa-chart-pie"></i> Statistics</a>
+            </li>
+            <li data-tab="settings">
+              <a href="#settings"><i class="fas fa-cog"></i> Settings</a>
+            </li>
+            <li data-tab="help">
+              <a href="#help"><i class="fas fa-question-circle"></i> Help</a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Connection Tab -->
+        <section id="connection" class="tab-content active">
+          <div class="panel">
+            <h2><i class="fas fa-link"></i> WhatsApp Connection</h2>
+            <div class="panel-content">
+              <!-- Added Sender Number Configuration -->
+              <div class="sender-config">
+                <h3>Sender Account Configuration</h3>
+                <p>Enter the phone number you'll use to send messages</p>
+                <div class="form-group">
+                  <label for="sender-number">WhatsApp Phone Number</label>
+                  <div class="input-with-prefix">
+                    <span class="input-prefix">+</span>
+                    <input type="text" id="sender-number" placeholder="e.g. 919876543210" 
+                           pattern="[0-9]+" title="Enter numbers only without country code prefix (+)">
+                  </div>
+                  <p class="field-info">Enter your full number including country code (without +)</p>
+                </div>
+                <button id="save-sender-btn" class="btn secondary">
+                  <i class="fas fa-save"></i> Save Sender Details
+                </button>
+              </div>
+              
+              <div class="separator"><span>OR</span></div>
+              
+              <div class="connection-controls">
+                <button id="start-btn" class="btn primary">
+                  <i class="fas fa-play"></i> Connect WhatsApp
+                </button>
+                <button id="stop-btn" class="btn danger" disabled>
+                  <i class="fas fa-stop"></i> Disconnect
+                </button>
+              </div>
+              <div class="qr-container" id="qr-container">
+                <p>Scan the QR code with your WhatsApp app to connect</p>
+                <div id="qr-code"></div>
+              </div>
+              <div class="connection-info" id="connection-info">
+                <div class="status-message" id="status-message">
+                  <p>Enter your sender details or click "Connect WhatsApp" to start</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Excel Upload Tab -->
+        <section id="excel-upload" class="tab-content">
+          <div class="panel">
+            <h2><i class="fas fa-file-excel"></i> Excel Template Upload</h2>
+            <div class="panel-content">
+              <div class="upload-container">
+                <div class="upload-info">
+                  <h3>Upload Excel Template</h3>
+                  <p>
+                    Please upload an Excel file with the following columns:
+                    <span class="required-field">Number</span>,
+                    <span class="required-field">Type</span>,
+                    <span class="required-field">Message/Caption</span>,
+                    and <span class="required-field">Link</span> (for document/media)
+                  </p>
+                  <div class="template-download">
+                    <a href="/download-template" class="btn secondary small">
+                      <i class="fas fa-download"></i> Download Example Template
+                    </a>
+                  </div>
+                </div>
+                <div class="upload-form">
+                  <div class="file-input-container">
+                    <input type="file" id="excel-file" accept=".xlsx, .xls" class="file-input">
+                    <label for="excel-file" class="file-label">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <span id="file-name">Choose Excel File</span>
+                    </label>
+                  </div>
+                  <button id="upload-btn" class="btn primary">
+                    <i class="fas fa-upload"></i> Upload Excel
+                  </button>
+                </div>
+              </div>
+              <div class="validation-results" id="validation-results">
+                <!-- Validation results will appear here -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Messaging Tab -->
+        <section id="messaging" class="tab-content">
+          <div class="panel">
+            <h2><i class="fas fa-paper-plane"></i> Send Messages</h2>
+            <div class="panel-content">
+              <div class="messaging-controls">
+                <div class="messaging-info">
+                  <h3>Start Messaging</h3>
+                  <p>Send messages to all contacts in your Excel template</p>
+                  <div id="excel-status"></div>
+                </div>
+                <div class="action-buttons">
+                  <button id="start-messaging-btn" class="btn primary" disabled>
+                    <i class="fas fa-paper-plane"></i> Start Messaging
+                  </button>
+                  <button id="stop-messaging-btn" class="btn danger" disabled>
+                    <i class="fas fa-stop"></i> Stop
+                  </button>
+                </div>
+              </div>
+              <div class="progress-container">
+                <div class="progress-info">
+                  <span id="progress-text">0/0 messages processed (0%)</span>
+                </div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar" id="progress-bar"></div>
+                </div>
+              </div>
+              <div class="message-log-container">
+                <h3>Message Log</h3>
+                <div class="message-log" id="message-log">
+                  <!-- Message logs will appear here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Statistics Tab -->
+        <section id="stats" class="tab-content">
+          <div class="panel">
+            <h2><i class="fas fa-chart-pie"></i> Statistics</h2>
+            <div class="panel-content">
+              <div class="stats-container">
+                <div class="stats-summary">
+                  <div class="stat-card">
+                    <div class="stat-icon">
+                      <i class="fas fa-list"></i>
+                    </div>
+                    <div class="stat-info">
+                      <h3>Total</h3>
+                      <p id="stat-total">0</p>
+                    </div>
+                  </div>
+                  <div class="stat-card success">
+                    <div class="stat-icon">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                      <h3>Sent</h3>
+                      <p id="stat-sent">0</p>
+                    </div>
+                  </div>
+                  <div class="stat-card warning">
+                    <div class="stat-icon">
+                      <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                      <h3>Pending</h3>
+                      <p id="stat-pending">0</p>
+                    </div>
+                  </div>
+                  <div class="stat-card danger">
+                    <div class="stat-icon">
+                      <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                      <h3>Failed</h3>
+                      <p id="stat-failed">0</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="stats-chart-container">
+                  <canvas id="stats-chart"></canvas>
+                </div>
+                <div class="refresh-stats">
+                  <button id="refresh-stats-btn" class="btn secondary">
+                    <i class="fas fa-sync-alt"></i> Refresh Statistics
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings Tab -->
+        <section id="settings" class="tab-content">
+          <div class="panel">
+            <h2><i class="fas fa-cog"></i> Settings</h2>
+            <div class="panel-content">
+              <form id="settings-form" class="settings-form">
+                <div class="form-group">
+                  <label for="delay-between-messages">Delay Between Messages (ms)</label>
+                  <input type="number" id="delay-between-messages" min="1000" max="10000" step="500" value="3000">
+                  <p class="field-info">Time to wait between sending messages (1000-10000 ms)</p>
+                </div>
+                <div class="form-group">
+                  <label for="max-retries">Maximum Retries</label>
+                  <input type="number" id="max-retries" min="0" max="5" step="1" value="3">
+                  <p class="field-info">Number of retry attempts if message sending fails (0-5)</p>
+                </div>
+                <div class="form-group">
+                  <label for="retry-delay">Retry Delay (ms)</label>
+                  <input type="number" id="retry-delay" min="1000" max="30000" step="1000" value="5000">
+                  <p class="field-info">Time to wait before retry attempts (1000-30000 ms)</p>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn primary">
+                    <i class="fas fa-save"></i> Save Settings
+                  </button>
+                  <button type="reset" class="btn secondary">
+                    <i class="fas fa-undo"></i> Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Help Tab -->
+        <section id="help" class="tab-content">
+          <div class="panel">
+            <h2><i class="fas fa-question-circle"></i> Help & Instructions</h2>
+            <div class="panel-content">
+              <div class="help-accordion">
+                <div class="accordion-item">
+                  <button class="accordion-header">
+                    <i class="fas fa-chevron-right"></i> What is WhatsApp Bulk Messenger?
+                  </button>
+                  <div class="accordion-content">
+                    <p>WhatsApp Bulk Messenger is a tool that allows you to send messages, documents, and media to multiple WhatsApp contacts automatically using an Excel spreadsheet as input.</p>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <button class="accordion-header">
+                    <i class="fas fa-chevron-right"></i> How to Connect WhatsApp
+                  </button>
+                  <div class="accordion-content">
+                    <ol>
+                      <li>Go to the Connection tab</li>
+                      <li>Click "Connect WhatsApp"</li>
+                      <li>Scan the QR code with your WhatsApp mobile app</li>
+                      <li>Wait for the connection to be established</li>
+                    </ol>
+                    <p><strong>Note:</strong> Keep your phone connected to the internet during the messaging process.</p>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <button class="accordion-header">
+                    <i class="fas fa-chevron-right"></i> Excel Template Format
+                  </button>
+                  <div class="accordion-content">
+                    <p>Your Excel file must have the following columns:</p>
+                    <ul>
+                      <li><strong>Number:</strong> The recipient's phone number (with or without country code)</li>
+                      <li><strong>Type:</strong> The type of message - must be one of: "message", "document", or "media"</li>
+                      <li><strong>Message/Caption:</strong> The text message or caption for media/documents</li>
+                      <li><strong>Link:</strong> The file path for document/media (required for document/media types)</li>
+                    </ul>
+                    <p>You can download an example template from the Excel Upload tab.</p>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <button class="accordion-header">
+                    <i class="fas fa-chevron-right"></i> Sending Messages
+                  </button>
+                  <div class="accordion-content">
+                    <ol>
+                      <li>First connect WhatsApp in the Connection tab</li>
+                      <li>Upload your Excel file in the Excel Upload tab</li>
+                      <li>Go to the Send Messages tab</li>
+                      <li>Click "Start Messaging" to begin sending messages</li>
+                      <li>You can monitor the progress and see logs of each message</li>
+                      <li>Click "Stop" at any time to pause the process</li>
+                    </ol>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <button class="accordion-header">
+                    <i class="fas fa-chevron-right"></i> Troubleshooting
+                  </button>
+                  <div class="accordion-content">
+                    <p><strong>If messages are not sending:</strong></p>
+                    <ul>
+                      <li>Make sure your WhatsApp is properly connected</li>
+                      <li>Check that your Excel format is correct</li>
+                      <li>Verify that file paths for documents/media are correct and accessible</li>
+                      <li>Ensure phone numbers are in the correct format</li>
+                      <li>Try increasing the delay between messages in Settings</li>
+                    </ul>
+                    <p><strong>If the application crashes:</strong></p>
+                    <ul>
+                      <li>Restart the application</li>
+                      <li>Check the logs folder for error details</li>
+                      <li>Reduce the size of your Excel file if it's very large</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2025 WhatsApp Bulk Messenger | Version 1.0.0</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  
+  <!-- Modular JavaScript -->
+  <script src="js/modules/ui.js"></script>
+  <script src="js/modules/connection.js"></script>
+  <script src="js/modules/excel.js"></script>
+  <script src="js/modules/messaging.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

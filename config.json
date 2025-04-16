@@ -1,0 +1,14 @@
+{
+  "DELAY_BETWEEN_MESSAGES": 3000,
+  "EXCEL_FILE": "C:\\Users\\karan\\Downloads\\typescript\\uploads\\template_1744788409741.xlsx",
+  "STATUS_FILE": "message_status.json",
+  "SUPPORTED_TYPES": [
+    "message",
+    "document",
+    "media"
+  ],
+  "MAX_RETRIES": 3,
+  "RETRY_DELAY": 5000,
+  "DATA_DIR": "./data",
+  "WHATSAPP_CLIENT_ID": "919699955568"
+}
