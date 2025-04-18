@@ -10,6 +10,9 @@ import path from 'path';
 import { logger } from '../utils/logger';
 import { ExcelRow, ValidationResult } from '../types/excel.types';
 
+// Define the default sheet name to look for
+const DEFAULT_SHEET_NAME = 'WhatsApp Messages';
+
 export class ExcelService {
   private workbookCache: XLSX.WorkBook | null = null;
   private cacheFilePath: string | null = null;
@@ -48,8 +51,20 @@ export class ExcelService {
         this.statusColumnIndex = -1; // Reset for new file
       }
       
-      // Always use the first sheet
-      const sheetName = workbook.SheetNames[0];
+      // Try to find the default sheet name
+      let sheetName = DEFAULT_SHEET_NAME;
+      
+      // Check if the default sheet exists
+      if (!workbook.SheetNames.includes(sheetName)) {
+        logger.warn(`Default sheet "${DEFAULT_SHEET_NAME}" not found. Available sheets: ${workbook.SheetNames.join(', ')}`);
+        
+        // If not, use the first sheet
+        sheetName = workbook.SheetNames[0];
+        logger.info(`Using first sheet instead: "${sheetName}"`);
+      } else {
+        logger.info(`Using sheet: "${sheetName}"`);
+      }
+      
       const worksheet = workbook.Sheets[sheetName];
       
       // Ensure Status column exists
@@ -58,7 +73,7 @@ export class ExcelService {
       // Convert sheet to JSON
       const data = XLSX.utils.sheet_to_json<ExcelRow>(worksheet);
       
-      logger.info(`Excel file loaded with ${data.length} rows`);
+      logger.info(`Excel file loaded with ${data.length} rows from sheet "${sheetName}"`);
       return data;
     } catch (error) {
       const err = error as Error;
@@ -100,14 +115,24 @@ export class ExcelService {
         };
       }
       
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      // Try to use the default sheet name
+      let sheetName = DEFAULT_SHEET_NAME;
+      
+      // Check if the default sheet exists
+      if (!workbook.SheetNames.includes(sheetName)) {
+        // If not, use the first sheet
+        sheetName = workbook.SheetNames[0];
+        logger.info(`Default sheet "${DEFAULT_SHEET_NAME}" not found. Using first sheet: "${sheetName}"`);
+      }
+      
+      const worksheet = workbook.Sheets[sheetName];
       const data = XLSX.utils.sheet_to_json<ExcelRow>(worksheet);
       
       if (data.length === 0) {
         return {
           valid: false,
-          message: 'Excel file does not contain any data',
-          errors: ['No data rows found in the Excel file']
+          message: `Sheet "${sheetName}" does not contain any data`,
+          errors: [`No data rows found in sheet "${sheetName}"`]
         };
       }
       
@@ -191,7 +216,7 @@ export class ExcelService {
       
       return {
         valid: true,
-        message: 'Excel structure is valid',
+        message: `Excel structure is valid (using sheet: ${sheetName})`,
         errors: []
       };
     } catch (error) {
@@ -267,10 +292,30 @@ export class ExcelService {
       
       if (this.workbookCache && this.cacheFilePath === filePath) {
         workbook = this.workbookCache;
-        worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        
+        // Try to find the default sheet name
+        let sheetName = DEFAULT_SHEET_NAME;
+        
+        // Check if the default sheet exists
+        if (!workbook.SheetNames.includes(sheetName)) {
+          // If not, use the first sheet
+          sheetName = workbook.SheetNames[0];
+        }
+        
+        worksheet = workbook.Sheets[sheetName];
       } else {
         workbook = XLSX.readFile(filePath);
-        worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        
+        // Try to find the default sheet name
+        let sheetName = DEFAULT_SHEET_NAME;
+        
+        // Check if the default sheet exists
+        if (!workbook.SheetNames.includes(sheetName)) {
+          // If not, use the first sheet
+          sheetName = workbook.SheetNames[0];
+        }
+        
+        worksheet = workbook.Sheets[sheetName];
         this.workbookCache = workbook;
         this.cacheFilePath = filePath;
         this.statusColumnIndex = -1; // Reset column index for new file
